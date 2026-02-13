@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Jeff32819DLL.TemplateFiller20</RootNamespace>
   </PropertyGroup>
 
 </Project>
