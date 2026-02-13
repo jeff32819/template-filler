@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -45,7 +44,7 @@ namespace Jeff32819DLL.TemplateFiller20
                 var tag = input.Substring(start + 2, end - (start + 2));
                 tag = NormalizeTag(tag);
                 // Add normalized tag to list
-                AddTag(tag);
+                Tags.Add(tag);
 
                 // Write normalized tag back into output
                 _builder.Append("{{").Append(tag).Append("}}");
@@ -54,58 +53,76 @@ namespace Jeff32819DLL.TemplateFiller20
                 i = end + 2;
             }
         }
-        // Change your property from List to HashSet
         public HashSet<string> Tags { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         public HashSet<string> TagsNotReplaced { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        private string AddTag(string tag)
-        {
-            // No 'if' or 'Contains' needed. 
-            // If it's a duplicate, .Add() simply does nothing.
-            Tags.Add(tag.Trim().ToLower());
-            return tag;
-        }
-
+        /// <summary>
+        /// Normalizes the specified tag by trimming whitespace and converting it to lowercase invariant.
+        /// </summary>
+        /// <param name="tag">The tag to normalize.</param>
+        /// <returns>The normalized tag as a lowercase invariant string with no leading or trailing whitespace.</returns>
         private static string NormalizeTag(string tag)
         {
             return tag.Trim().ToLowerInvariant();
         }
+        /// <summary>
+        /// If tag is not found you have have template to show it in output, for example: "<strong>{0}</strong>", default is replace tag with empty string.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="tagNotFoundTemplate"></param>
+        /// <returns></returns>
         public string Apply(object model, string tagNotFoundTemplate = "")
         {
             var map = BuildPropertyMap(model.GetType());
             var output = Text;
 
-
             foreach (var tag in Tags)
             {
                 var placeholder = tag.AddBrackets();
-                var propertyName = tag.ToPropertyName();
-                Console.WriteLine($"propertyName = {propertyName}");
-                
-                if (map.TryGetValue(propertyName, out var getter))
+                var value = GetNestedPropertyValue(model, tag);
+
+                if (value != null)
                 {
-                    var value = getter(model);
-                    output = output.Replace(placeholder, value);
+                    output = output.Replace(placeholder, value.ToString());
                 }
                 else
                 {
                     TagsNotReplaced.Add(tag);
-
                     if (string.IsNullOrEmpty(tagNotFoundTemplate))
                     {
                         output = output.Replace(placeholder, "");
                         continue;
                     }
-
                     var formatted = string.Format(tagNotFoundTemplate, placeholder);
                     output = output.Replace(placeholder, formatted);
                 }
             }
-
-
             return output;
         }
+        public static object GetNestedPropertyValue(object obj, string path)
+        {
+            var current = obj;
+            var parts = path.Split('.');
 
+            foreach (var part in parts)
+            {
+                if (current == null)
+                    return null;
+
+                var propName = part.ToPropertyName(); // your snake_case → PascalCase helper
+
+                var prop = current.GetType().GetProperty(
+                    propName,
+                    BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase
+                );
+
+                if (prop == null)
+                    return null;
+
+                current = prop.GetValue(current);
+            }
+            return current;
+        }
         private static Dictionary<string, Func<object, string>> BuildPropertyMap(Type type)
         {
             return type
