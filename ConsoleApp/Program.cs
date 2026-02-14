@@ -14,7 +14,7 @@ var result = parser.Apply(new DemoModel
 
 Console.WriteLine();
 
-if (parser.AllTagsReplaced)
+if (result.AllTagsReplaced)
 {
     Console.WriteLine("all tags replaced");
 }
@@ -23,7 +23,7 @@ else
     Console.WriteLine("Tags not found");
     Console.ForegroundColor = ConsoleColor.Red;
     Console.WriteLine();
-    foreach (var tag in parser.TagsNotReplaced)
+    foreach (var tag in result.TagsNotReplaced)
     {
         Console.WriteLine($" - {tag}");
     }
@@ -31,13 +31,10 @@ else
     Console.ResetColor();
 }
 
-
-
-
 Console.WriteLine();
 Console.WriteLine("output:");
 Console.WriteLine();
-Console.WriteLine(result);
+Console.WriteLine(result.Text);
 
 Console.WriteLine();
 Console.WriteLine("------------------------------------------------------------------------------------------------------");
