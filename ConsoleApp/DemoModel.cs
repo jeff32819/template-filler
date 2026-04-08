@@ -9,5 +9,6 @@
         public UserModel User { get; set; } = new();
         public string Code { get; set; } = "";
         public string HelloWorld { get; set; } = "";
+        public string Hello_World { get; set; }
     }
 }

@@ -1,11 +1,18 @@
 ﻿using ConsoleApp;
 using Jeff32819DLL.TemplateFiller20;
 
-var parser = new TagParser("Hello {{ user.name }}, your code is {{ code }}. {{ hello_world }} {{ user.name }}");
+var parser = new TagParser();
+parser.Parse("Here is another sentence for customer {{customer_name}} for move on date {{datetime}}");
+parser.Parse("Code: {{code}}, HelloWorld: {{hello world}}, Hello_World: {{hello_world}}, User.Name: {{user.name}}, User.Name with brackets: {{user.name}}");
+
+parser.TagDictionary.SetValue("customer_name", "bob smith");
+
+
 var result = parser.Apply(new DemoModel
 {
     Code = "ABC123",
     HelloWorld = "hello world 123",
+    Hello_World = "hello world 456",
     User = new DemoModel.UserModel
     {
         Name = "bob smith"
@@ -27,7 +34,6 @@ else
     {
         Console.WriteLine($" - {tag}");
     }
-
     Console.ResetColor();
 }
 
@@ -49,5 +55,5 @@ var result2 = parser.Apply(new DemoModel // test another model with different va
     }
 });
 
-Console.WriteLine(result2);
+Console.WriteLine(result2.Text);
 Console.ReadKey();

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
-
 using Jeff32819DLL.TemplateFiller20.Models;
 
 namespace Jeff32819DLL.TemplateFiller20
@@ -9,14 +7,10 @@ namespace Jeff32819DLL.TemplateFiller20
     public sealed class TagParser
     {
         private readonly StringBuilder _builder = new StringBuilder();
+        //public HashSet<string> Tags { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        public TagDictionary TagDictionary { get; } = new TagDictionary();
 
-        public TagParser(string input)
-        {
-            Parse(input);
-        }
-        public HashSet<string> Tags { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        private void Parse(string input)
+        public void Parse(string input)
         {
             var i = 0;
             var length = input.Length;
@@ -44,7 +38,7 @@ namespace Jeff32819DLL.TemplateFiller20
                 var tag = input.Substring(start + 2, end - (start + 2));
                 tag = Code.NormalizeTag(tag);
                 // Add normalized tag to list
-                Tags.Add(tag);
+                TagDictionary.Add(tag);
 
                 // Write normalized tag back into output
                 _builder.Append("{{").Append(tag).Append("}}");
@@ -53,7 +47,6 @@ namespace Jeff32819DLL.TemplateFiller20
                 i = end + 2;
             }
         }
-
 
 
         /// <summary>
@@ -65,12 +58,18 @@ namespace Jeff32819DLL.TemplateFiller20
         /// <returns></returns>
         public ApplyResult Apply(object model, string tagNotFoundTemplate = "")
         {
+
+
+
+
             var rv = new ApplyResult
             {
                 Text = _builder.ToString()
             };
-            var map = Code.BuildPropertyMap(model.GetType());
-            foreach (var tag in Tags)
+            // not using at moment // var map = Code.BuildPropertyMap(model.GetType());
+
+
+            foreach (var tag in TagDictionary.Tags())
             {
                 var placeholder = tag.AddBrackets();
                 var value = Code.GetNestedPropertyValue(model, tag);
@@ -92,6 +91,7 @@ namespace Jeff32819DLL.TemplateFiller20
                     rv.Text = rv.Text.Replace(placeholder, formatted);
                 }
             }
+
             return rv;
         }
     }
