@@ -32,6 +32,21 @@ namespace Jeff32819DLL.TemplateFiller20
                 _dict.Add(normalizedTag, null);
             }
         }
+        /// <summary>
+        ///    Adds multiple tags to the dictionary. Each tag in the provided collection is added using the same logic as the AddTag method.
+        /// </summary>
+        /// <param name="tags">A collection of tags to add to the dictionary.</param>
+        public void AddTags(HashSet<string> tags)
+        {
+            if (tags == null) return;
+
+            foreach (var tag in tags)
+            {
+                // This re-uses your existing logic (normalization + check)
+                this.AddTag(tag);
+            }
+        }
+
 
         /// <summary>
         ///     Try to get the value associated with the specified tag.

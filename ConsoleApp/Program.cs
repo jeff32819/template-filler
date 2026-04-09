@@ -2,13 +2,13 @@
 using Jeff32819DLL.TemplateFiller20;
 
 var parser = new TagParser();
-parser.Parse("Here is another sentence for customer {{customer_name}} for move on date {{datetime}}");
-parser.Parse("Code: {{code}}, Hello_World: {{hello_world}}, User.Name: {{user.name}}, User.Name with brackets: {{user.name}}");
-
-parser.TagDictionary.SetValue("customer_name", "bob smith");
-parser.TagDictionary.SetValue(new
+var txt1 = parser.Parse("Here is another sentence for customer {{customer_name}} for move on date {{datetime}}");
+var txt2 = parser.Parse("Code: {{code}}, Hello_World: {{hello_world}}");
+parser.SetValue("customer_name", "bob smith");
+parser.SetValue(new
 {
     Code = "ABC123",
+    DateTime = DateTime.Now.ToString("yyyy-MM-dd"),
     HelloWorld = "hello world 123",
     Hello_World = "hello world 456",
     User = new DemoModel.UserModel
@@ -16,9 +16,7 @@ parser.TagDictionary.SetValue(new
         Name = "bob smith"
     }
 });
-
-
-var result = parser.Apply();
+var result = parser.Apply(false);
 
 Console.WriteLine();
 

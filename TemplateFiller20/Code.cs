@@ -4,9 +4,11 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
+using Jeff32819DLL.TemplateFiller20.Models;
+
 namespace Jeff32819DLL.TemplateFiller20
 {
-    internal class Code
+    public static class Code
     {
         /// <summary>
         ///     Normalizes the specified tag by trimming whitespace and converting it to lowercase invariant.
@@ -147,6 +149,68 @@ namespace Jeff32819DLL.TemplateFiller20
                     }),
                     StringComparer.OrdinalIgnoreCase
                 );
+        }
+
+        
+
+
+
+        public static TextParseResult ParseText(string input)
+        {
+            var result = new TextParseResult();
+
+            if (string.IsNullOrEmpty(input))
+            {
+                result.Text = string.Empty;
+                return result;
+            }
+
+            // Using a local StringBuilder for the text transformation
+            var sb = new StringBuilder();
+            var i = 0;
+            var length = input.Length;
+
+            while (i < length)
+            {
+                var start = input.IndexOf("{{", i, StringComparison.Ordinal);
+                if (start < 0)
+                {
+                    sb.Append(input, i, length - i);
+                    break;
+                }
+
+                // Append text before tag
+                sb.Append(input, i, start - i);
+
+                var end = input.IndexOf("}}", start + 2, StringComparison.Ordinal);
+                if (end < 0)
+                {
+                    throw new Exception("Closing brackets not found at index " + start);
+                }
+
+                // 1. Extract and Clean
+                var rawTag = input.Substring(start + 2, end - (start + 2));
+                var normalizedTag = Code.NormalizeTag(rawTag.Trim());
+
+                if (!string.IsNullOrEmpty(normalizedTag))
+                {
+                    // 2. Add to the HashSet (it handles duplicates automatically)
+                    result.Tags.Add(normalizedTag);
+
+                    // 3. Write normalized tag back into output builder
+                    sb.Append("{{").Append(normalizedTag).Append("}}");
+                }
+                else
+                {
+                    // Handle empty tags like {{  }}
+                    sb.Append("{{}}");
+                }
+
+                i = end + 2;
+            }
+
+            result.Text = sb.ToString();
+            return result;
         }
     }
 }
