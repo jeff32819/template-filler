@@ -52,14 +52,14 @@ namespace Jeff32819DLL.TemplateFiller20
             return this;
         }
 
-        public string Apply()
+        public string ParseTemplate()
         {
             return Texts.AllText.Count > 1
                 ? throw new Exception("there is more than one text, you must pass the name of one")
                 : Process(Texts.AllText.First().Value);
         }
 
-        public string Apply(string key)
+        public string ParseTemplate(string key)
         {
             return !Texts.AllText.TryGetValue(key, out var text)
                 ? throw new Exception($"Cannot find key {key}")
