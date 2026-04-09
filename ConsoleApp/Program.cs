@@ -3,12 +3,10 @@ using Jeff32819DLL.TemplateFiller20;
 
 var parser = new TagParser();
 parser.Parse("Here is another sentence for customer {{customer_name}} for move on date {{datetime}}");
-parser.Parse("Code: {{code}}, HelloWorld: {{hello world}}, Hello_World: {{hello_world}}, User.Name: {{user.name}}, User.Name with brackets: {{user.name}}");
+parser.Parse("Code: {{code}}, Hello_World: {{hello_world}}, User.Name: {{user.name}}, User.Name with brackets: {{user.name}}");
 
 parser.TagDictionary.SetValue("customer_name", "bob smith");
-
-
-var result = parser.Apply(new DemoModel
+parser.TagDictionary.SetValue(new
 {
     Code = "ABC123",
     HelloWorld = "hello world 123",
@@ -18,6 +16,9 @@ var result = parser.Apply(new DemoModel
         Name = "bob smith"
     }
 });
+
+
+var result = parser.Apply();
 
 Console.WriteLine();
 
@@ -34,6 +35,7 @@ else
     {
         Console.WriteLine($" - {tag}");
     }
+
     Console.ResetColor();
 }
 
@@ -45,15 +47,4 @@ Console.WriteLine(result.Text);
 Console.WriteLine();
 Console.WriteLine("------------------------------------------------------------------------------------------------------");
 Console.WriteLine();
-var result2 = parser.Apply(new DemoModel // test another model with different values, but same tags, to show that the parser can be reused
-{
-    Code = "my code",
-    HelloWorld = "first text",
-    User = new DemoModel.UserModel
-    {
-        Name = "jeff m"
-    }
-});
-
-Console.WriteLine(result2.Text);
 Console.ReadKey();

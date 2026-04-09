@@ -132,15 +132,18 @@ namespace Jeff32819DLL.TemplateFiller20
         /// case-insensitive with respect to property names.</returns>
         public static Dictionary<string, Func<object, string>> BuildPropertyMap(Type type)
         {
-            return type
-                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            return type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Where(p => p.CanRead)
                 .ToDictionary(
-                    p => p.Name.ToLowerInvariant(),
+                    p => p.Name,
                     p => (Func<object, string>)(obj =>
                     {
-                        var value = p.GetValue(obj);
-                        return value?.ToString() ?? "";
+                        if (obj == null) return string.Empty;
+
+                        // Standard 2.0: Use null for the index parameter
+                        object value = p.GetValue(obj, null);
+
+                        return value != null ? value.ToString() : string.Empty;
                     }),
                     StringComparer.OrdinalIgnoreCase
                 );

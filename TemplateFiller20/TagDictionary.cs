@@ -24,11 +24,13 @@ namespace Jeff32819DLL.TemplateFiller20
         ///     Adds a tag-value pair to the dictionary. If the tag already exists, its value is updated.
         /// </summary>
         /// <param name="tag">The tag to add or update.</param>
-        /// <param name="value">The value associated with the tag. Can be null.</param>
-        public void Add(string tag, string value = null)
+        public void AddTag(string tag)
         {
             var normalizedTag = Code.NormalizeTag(tag);
-            _dict[normalizedTag] = value;
+            if (!_dict.ContainsKey(normalizedTag))
+            {
+                _dict.Add(normalizedTag, null);
+            }
         }
 
         /// <summary>
@@ -43,7 +45,18 @@ namespace Jeff32819DLL.TemplateFiller20
         public bool TryGetValue(string tag, out string value)
         {
             var normalizedTag = Code.NormalizeTag(tag);
-            return _dict.TryGetValue(normalizedTag, out value);
+
+            if (_dict.TryGetValue(normalizedTag, out value))
+            {
+                // Key was found, 'value' is already set. 
+                // Optional: handle nulls inside the dictionary itself
+                if (value == null) value = string.Empty;
+                return true;
+            }
+
+            // Key was NOT found
+            value = string.Empty;
+            return false;
         }
 
         /// <summary>
@@ -65,6 +78,29 @@ namespace Jeff32819DLL.TemplateFiller20
         }
 
         /// <summary>
+        ///     Set value for a dictionary item by using the property name and value of a model object.
+        ///     The method uses reflection to get the properties of the model and their values, then sets the corresponding tags in
+        ///     the dictionary with those values.
+        ///     If a tag corresponding to a property does not exist in the dictionary, it will be ignored.
+        /// </summary>
+        /// <param name="model"></param>
+        public void SetValue(object model)
+        {
+            if (model == null)
+            {
+                return;
+            }
+
+            var props = Code.BuildPropertyMap(model.GetType());
+
+            foreach (var entry in props)
+            {
+                SetValue(entry.Key, entry.Value(model));
+            }
+        }
+
+
+        /// <summary>
         ///     Gets tags without value.
         /// </summary>
         /// <returns></returns>
@@ -72,12 +108,17 @@ namespace Jeff32819DLL.TemplateFiller20
         {
             return (from tag in _dict where string.IsNullOrEmpty(tag.Value) select tag.Key).ToList();
         }
+        /// <summary>
+        ///     Determines whether there are any tags without a value in the collection.
+        /// </summary>
+        /// <returns></returns>
+        public int TagsWithoutValueCount() => TagsWithoutValue().Count;
 
         /// <summary>
         ///     Retrieves a list of all tag names currently stored in the collection.
         /// </summary>
         /// <returns>A list of strings containing the names of all tags. The list will be empty if no tags are present.</returns>
-        public List<string> Tags()
+        public List<string> TagList()
         {
             return (from tag in _dict select tag.Key).ToList();
         }

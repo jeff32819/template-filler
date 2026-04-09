@@ -7,9 +7,14 @@ namespace Jeff32819DLL.TemplateFiller20
     public sealed class TagParser
     {
         private readonly StringBuilder _builder = new StringBuilder();
-        //public HashSet<string> Tags { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
         public TagDictionary TagDictionary { get; } = new TagDictionary();
 
+        /// <summary>
+        /// Parse text and extract all the tags
+        /// </summary>
+        /// <param name="input"></param>
+        /// <exception cref="Exception"></exception>
         public void Parse(string input)
         {
             var i = 0;
@@ -38,7 +43,7 @@ namespace Jeff32819DLL.TemplateFiller20
                 var tag = input.Substring(start + 2, end - (start + 2));
                 tag = Code.NormalizeTag(tag);
                 // Add normalized tag to list
-                TagDictionary.Add(tag);
+                TagDictionary.AddTag(tag);
 
                 // Write normalized tag back into output
                 _builder.Append("{{").Append(tag).Append("}}");
@@ -48,19 +53,19 @@ namespace Jeff32819DLL.TemplateFiller20
             }
         }
 
-
         /// <summary>
         ///     If tag is not found you have have template to show it in output, for example: "<strong>{0}</strong>", default is
         ///     replace tag with empty string.
         /// </summary>
-        /// <param name="model"></param>
-        /// <param name="tagNotFoundTemplate"></param>
+        /// <param name="throwIfTagNotFound">Indicates whether to throw an exception if a tag is not found. Default is true.</param>
+        /// <param name="tagNotFoundTemplate">Template to use when a tag is not found. Default is empty string.</param>
         /// <returns></returns>
-        public ApplyResult Apply(object model, string tagNotFoundTemplate = "")
+        public ApplyResult Apply(bool throwIfTagNotFound = true, string tagNotFoundTemplate = "")
         {
-
-
-
+            if (throwIfTagNotFound && TagDictionary.TagsWithoutValueCount() > 0)
+            {
+                throw new Exception("There are tags without values: " + string.Join(", ", TagDictionary.TagsWithoutValue()));
+            }
 
             var rv = new ApplyResult
             {
@@ -69,12 +74,12 @@ namespace Jeff32819DLL.TemplateFiller20
             // not using at moment // var map = Code.BuildPropertyMap(model.GetType());
 
 
-            foreach (var tag in TagDictionary.Tags())
+            foreach (var tag in TagDictionary.TagList())
             {
                 var placeholder = tag.AddBrackets();
-                var value = Code.GetNestedPropertyValue(model, tag);
+                TagDictionary.TryGetValue(tag, out var value);
 
-                if (value != null)
+                if (!string.IsNullOrEmpty(value))
                 {
                     rv.Text = rv.Text.Replace(placeholder, value.ToString());
                 }
@@ -86,12 +91,10 @@ namespace Jeff32819DLL.TemplateFiller20
                         rv.Text = rv.Text.Replace(placeholder, "");
                         continue;
                     }
-
                     var formatted = string.Format(tagNotFoundTemplate, placeholder);
                     rv.Text = rv.Text.Replace(placeholder, formatted);
                 }
             }
-
             return rv;
         }
     }
