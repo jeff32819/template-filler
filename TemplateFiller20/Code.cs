@@ -48,6 +48,7 @@ namespace Jeff32819DLL.TemplateFiller20
 
             return sb.ToString();
         }
+
         /// <summary>
         /// Converts the specified string to snake_case format by inserting underscores before uppercase letters and
         /// converting all characters to lowercase.
@@ -55,8 +56,9 @@ namespace Jeff32819DLL.TemplateFiller20
         /// <remarks>This method does not modify the original string. Underscores are inserted before each
         /// uppercase letter except the first character.</remarks>
         /// <param name="input">The input string to convert to snake_case. Cannot be null.</param>
+        /// <param name="separator"></param>
         /// <returns>A new string in snake_case format. Returns the original string if it is null or empty.</returns>
-        public static string ToSnakeCase(string input)
+        public static string ToDelimitedCase(string input, char separator)
         {
             if (string.IsNullOrEmpty(input)) return input;
 
@@ -68,10 +70,10 @@ namespace Jeff32819DLL.TemplateFiller20
 
                 if (char.IsUpper(c))
                 {
-                    // If it's uppercase and NOT the first character, add an underscore
+                    // If it's uppercase and NOT the first character, add the separator
                     if (i > 0)
                     {
-                        sb.Append('_');
+                        sb.Append(separator);
                     }
                     sb.Append(char.ToLower(c));
                 }
@@ -80,9 +82,10 @@ namespace Jeff32819DLL.TemplateFiller20
                     sb.Append(c);
                 }
             }
-
             return sb.ToString();
         }
+
+
         /// <summary>
         /// Retrieves the value of a nested property from an object using a dot-delimited property path.
         /// </summary>

@@ -2,7 +2,7 @@
 using Jeff32819DLL.TemplateFiller20;
 
 var p = new Parser()
-    .AddText("Here is a sentence for customer {{customer_name}} for move on date {{datetime}} and another tag {{another}}")
+    .AddText("Here is a sentence for customer {{customer_name}}, saying {{hello-world}} for move on date {{datetime}} and another tag {{another}}")
     .SetValues(new
     {
         CustomerName = "bob smith",
@@ -10,7 +10,6 @@ var p = new Parser()
         Code = "ABC123",
         DateTime = DateTime.Now.ToString("yyyy-MM-dd"),
         HelloWorld = "hello world 123",
-        Hello_World = "hello world 456",
         User = new DemoModel.UserModel
         {
             Name = "bob smith"

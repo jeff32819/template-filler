@@ -30,11 +30,6 @@ namespace Jeff32819DLL.TemplateFiller20
             var tmp = tag.Trim();
             Console.WriteLine(tmp);
             KeyList.Add(tmp);
-            AddTagToDictionary(tmp.ToLowerInvariant());
-            AddTagToDictionary(tmp.Replace("_", "").ToLowerInvariant());
-        }
-        private void AddTagToDictionary(string tag)
-        {
             if (AllTags.ContainsKey(tag)) // do not want to overwrite existing values, check if the normalized tag already exists in the dictionary.
             {
                 return;
@@ -95,11 +90,15 @@ namespace Jeff32819DLL.TemplateFiller20
         public void SetValue(string tag, string value)
         {
             var normalizedTag = Code.NormalizeTag(tag);
-            SetValueToDictionary(Code.ToSnakeCase(tag), value);
-            SetValueToDictionary(Code.ToPascalCase(tag), value);
+            if (char.IsUpper(tag[0])) // PascalCase tag, set value for both delimited versions of the tag (with '-' and '_') to support different naming conventions.
+            {
+                SetValueIfExists(Code.ToDelimitedCase(tag, '-'), value); // Set value for the tag with '-' delimiter if it exists in the dictionary.
+                SetValueIfExists(Code.ToDelimitedCase(tag, '_'), value); // Set value for the tag with '_' delimiter if it exists in the dictionary.
+            }
+            SetValueIfExists(tag, value);
         }
 
-        private void SetValueToDictionary(string tag, string value)
+        private void SetValueIfExists(string tag, string value)
         {
             tag = tag.ToLowerInvariant();
             if (!AllTags.ContainsKey(tag))
