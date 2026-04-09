@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>Jeff32819DLL.TemplateFiller20</RootNamespace>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.0.6.0</Version>
+    <Version>1.0.9.0</Version>
     <PackageId>Jeff32819DLL.TemplateFiller20</PackageId>
   </PropertyGroup>
 </Project>

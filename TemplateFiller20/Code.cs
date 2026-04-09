@@ -53,11 +53,11 @@ namespace Jeff32819DLL.TemplateFiller20
         /// Converts the specified string to snake_case format by inserting underscores before uppercase letters and
         /// converting all characters to lowercase.
         /// </summary>
-        /// <remarks>This method does not modify the original string. Underscores are inserted before each
+        /// <remarks>This method does not modify the original string. The specified separator is inserted before each
         /// uppercase letter except the first character.</remarks>
-        /// <param name="input">The input string to convert to snake_case. Cannot be null.</param>
-        /// <param name="separator"></param>
-        /// <returns>A new string in snake_case format. Returns the original string if it is null or empty.</returns>
+        /// <param name="input">The input string to convert to a delimited format. Cannot be null.</param>
+        /// <param name="separator">The character to use as a delimiter between words.</param>
+        /// <returns>A new string in the specified delimited format. Returns the original string if it is null or empty.</returns>
         public static string ToDelimitedCase(string input, char separator)
         {
             if (string.IsNullOrEmpty(input)) return input;

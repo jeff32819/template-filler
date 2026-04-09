@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Linq;
 
-using static System.Net.Mime.MediaTypeNames;
-
 namespace Jeff32819DLL.TemplateFiller20
 {
     public class Parser
@@ -11,20 +9,16 @@ namespace Jeff32819DLL.TemplateFiller20
 
         public TextDictionary Texts = new TextDictionary();
 
-        public Parser(bool throwIfTagNotFound = true, string tagNotFoundText = "")
+        public Parser(string tagNotFoundText = "")
         {
-            ThrowIfTagNotFound = throwIfTagNotFound;
             TagNotFoundText = tagNotFoundText;
         }
-
-        public bool ThrowIfTagNotFound { get; set; }
         public string TagNotFoundText { get; set; }
-
         public Parser AddText(string key, string text)
         {
             var result = Code.ParseText(text);
             Tags.AddTags(result.Tags);
-            Texts.Add(key, text);
+            Texts.Add(key, result.Text);
             return this;
         }
 
@@ -34,9 +28,7 @@ namespace Jeff32819DLL.TemplateFiller20
             {
                 throw new Exception("There is already a default text parsed.");
             }
-            var result = Code.ParseText(text);
-            Tags.AddTags(result.Tags);
-            Texts.Add("default", text);
+            AddText("default", text);
             return this;
         }
 
@@ -51,6 +43,16 @@ namespace Jeff32819DLL.TemplateFiller20
             Tags.SetValue(tag, value);
             return this;
         }
+        /// <summary>
+        /// Validates that all tags have values, if any tag does not have a value, an exception is thrown with the list of tags without values. 
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public Parser VerifyAllTagsHaveValue()
+        {
+            return Tags.TagsWithoutValueCount() > 0 ? throw new Exception("There are tags without values: " + string.Join(", ", Tags.TagsWithoutValue())) : this;
+        }
+
 
         public string ParseTemplate()
         {
@@ -68,11 +70,6 @@ namespace Jeff32819DLL.TemplateFiller20
 
         private string Process(string text)
         {
-            if (ThrowIfTagNotFound && Tags.TagsWithoutValueCount() > 0)
-            {
-                throw new Exception("There are tags without values: " + string.Join(", ", Tags.TagsWithoutValue()));
-            }
-
             var rv = text ?? string.Empty;
             foreach (var tag in Tags.AllTags)
             {
