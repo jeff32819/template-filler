@@ -190,7 +190,7 @@ namespace Jeff32819DLL.TemplateFiller20
 
                 // 1. Extract and Clean
                 var rawTag = input.Substring(start + 2, end - (start + 2));
-                var normalizedTag = Code.NormalizeTag(rawTag.Trim()).Replace("_", "");
+                var normalizedTag = rawTag.Trim();
 
                 if (!string.IsNullOrEmpty(normalizedTag))
                 {

@@ -70,7 +70,7 @@ namespace Jeff32819DLL.TemplateFiller20
             // not using at moment // var map = Code.BuildPropertyMap(model.GetType());
 
 
-            foreach (var tag in TagDictionary.TagList())
+            foreach (var tag in TagDictionary.KeyList)
             {
                 var placeholder = tag.AddBrackets();
                 TagDictionary.TryGetValue(tag, out var value);
@@ -102,9 +102,9 @@ namespace Jeff32819DLL.TemplateFiller20
         /// <param name="tag"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public bool SetValue(string tag, string value)
+        public void SetValue(string tag, string value)
         {
-            return TagDictionary.SetValue(tag, value);
+            TagDictionary.SetValue(tag, value);
         }
 
         /// <summary>
