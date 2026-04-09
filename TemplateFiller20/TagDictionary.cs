@@ -26,10 +26,11 @@ namespace Jeff32819DLL.TemplateFiller20
         /// <param name="tag">The tag to add or update.</param>
         public void AddTag(string tag)
         {
-            var normalizedTag = Code.NormalizeTag(tag);
+            var normalizedTag = Code.NormalizeTag(tag).Replace("_", "");
             if (!_dict.ContainsKey(normalizedTag))
             {
                 _dict.Add(normalizedTag, null);
+                Console.WriteLine($"Adding tag: {normalizedTag}");
             }
         }
         /// <summary>
@@ -110,7 +111,8 @@ namespace Jeff32819DLL.TemplateFiller20
 
             foreach (var entry in props)
             {
-                SetValue(entry.Key, entry.Value(model));
+                SetValue(entry.Key.Replace("_", ""), entry.Value(model));
+
             }
         }
 
@@ -156,6 +158,17 @@ namespace Jeff32819DLL.TemplateFiller20
         public bool Exists(string tag)
         {
             return _dict.ContainsKey(tag);
+        }
+
+        public void Debug()
+        {
+            foreach (KeyValuePair<string, string> entry in _dict)
+            {
+                string tag = entry.Key;
+                string val = entry.Value;
+
+                Console.WriteLine("Tag: " + tag + " = " + val);
+            }
         }
     }
 }

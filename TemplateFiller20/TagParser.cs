@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Text;
+using System.Collections.Generic;
+using System.Linq;
 using Jeff32819DLL.TemplateFiller20.Models;
 
 namespace Jeff32819DLL.TemplateFiller20
 {
     public sealed class TagParser
     {
-        private readonly StringBuilder _builder = new StringBuilder();
-        public string Text { get; private set; }
+        private readonly Dictionary<string, string> _textDictionary = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         public TagDictionary TagDictionary { get; } = new TagDictionary();
 
         /// <summary>
@@ -15,28 +15,44 @@ namespace Jeff32819DLL.TemplateFiller20
         /// </summary>
         /// <param name="txt"></param>
         /// <exception cref="Exception"></exception>
-        public string Parse(string txt)
+        public void Parse(string txt)
+        {
+            if (_textDictionary.Count > 0)
+            {
+                throw new Exception("There is already a default text parsed.");
+            }
+
+            var result = Code.ParseText(txt);
+            TagDictionary.AddTags(result.Tags);
+            _textDictionary.Add("default", result.Text);
+        }
+
+        public void Parse(string key, string txt)
         {
             var result = Code.ParseText(txt);
             TagDictionary.AddTags(result.Tags);
-            Text = (string.IsNullOrEmpty(Text) ? result.Text : Text + " " + result.Text).Trim();
-            return result.Text;
+            _textDictionary.Add(key, result.Text);
         }
 
-        public ApplyResult Apply(string text, bool throwIfTagNotFound = true, string tagNotFoundTemplate = "")
+        public ApplyResult Apply(string key, bool throwIfTagNotFound = true, string tagNotFoundTemplate = "")
         {
-            return Process(text, throwIfTagNotFound, tagNotFoundTemplate);
+            return !_textDictionary.TryGetValue(key, out var text)
+                ? throw new Exception($"Cannot find key {key}")
+                : Process(text, throwIfTagNotFound, tagNotFoundTemplate);
         }
 
         public ApplyResult Apply(bool throwIfTagNotFound = true, string tagNotFoundTemplate = "")
         {
-            return Process(Text, throwIfTagNotFound, tagNotFoundTemplate);
+            return _textDictionary.Count > 1
+                ? throw new Exception("there is more than one text, you must pass the name of one")
+                : Process(_textDictionary.First().Value, throwIfTagNotFound, tagNotFoundTemplate);
         }
 
         /// <summary>
         ///     If tag is not found you have have template to show it in output, for example: "<strong>{0}</strong>", default is
         ///     replace tag with empty string.
         /// </summary>
+        /// <param name="text"></param>
         /// <param name="throwIfTagNotFound">Indicates whether to throw an exception if a tag is not found. Default is true.</param>
         /// <param name="tagNotFoundTemplate">Template to use when a tag is not found. Default is empty string.</param>
         /// <returns></returns>
@@ -98,9 +114,14 @@ namespace Jeff32819DLL.TemplateFiller20
         ///     If a tag corresponding to a property does not exist in the dictionary, it will be ignored.
         /// </summary>
         /// <param name="model"></param>
-        public void SetValue(object model)
+        public void SetValues(object model)
         {
             TagDictionary.SetValue(model);
+        }
+
+        public void Debug()
+        {
+            TagDictionary.Debug();
         }
     }
 }
